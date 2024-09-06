@@ -1,4 +1,9 @@
 import { MongoClient } from 'mongodb';
+import {
+  connectDB,
+  getAllDocuments,
+  insertDocument,
+} from '../../../../helpers/db-util';
 
 export async function POST(request, { params }) {
   const body = await request.json();
@@ -34,11 +39,29 @@ export async function POST(request, { params }) {
 
   console.log('data here', { newComment });
 
-  const dbUrl = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.vfrndqf.mongodb.net/newsletter-nextjs-course?retryWrites=true&w=majority&appName=Cluster0`;
-  const client = await MongoClient.connect(dbUrl);
-  const db = client.db();
-  const result = await db.collection('comments').insertOne(newComment);
-  console.log('in here oe result', { result });
+  let client;
+  let result;
+
+  try {
+    // const dbUrl = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.vfrndqf.mongodb.net/newsletter-nextjs-course?retryWrites=true&w=majority&appName=Cluster0`;
+    // const client = await MongoClient.connect(dbUrl);
+    client = await connectDB();
+    // const db = client.db();
+    // const result = await db.collection('comments').insertOne(newComment);
+
+    result = await insertDocument(client, 'comments', newComment);
+  } catch (error) {
+    const response = new Response(
+      JSON.stringify({ message: 'Error adding comment', error }),
+      {
+        status: 500,
+      }
+    );
+    client?.close();
+    return response;
+  }
+
+  console.log('result', { result });
   client.close();
 
   return new Response(
@@ -76,14 +99,37 @@ export async function GET(request, { params }) {
   //   status: 200,
   // });
 
-  const dbUrl = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.vfrndqf.mongodb.net/newsletter-nextjs-course?retryWrites=true&w=majority&appName=Cluster0`;
-  const client = await MongoClient.connect(dbUrl);
-  const db = client.db();
-  const result = await db
-    .collection('comments')
-    .find({ eventId: eventId })
-    .sort({ _id: -1 })
-    .toArray();
+  // const dbUrl = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.vfrndqf.mongodb.net/newsletter-nextjs-course?retryWrites=true&w=majority&appName=Cluster0`;
+  // const client = await MongoClient.connect(dbUrl);
+
+  // const db = client.db();
+  // const result = await db
+  //   .collection('comments')
+  //   .find({ eventId: eventId })
+  //   .sort({ _id: -1 })
+  //   .toArray();
+  let client;
+  let result;
+
+  try {
+    client = await connectDB();
+    result = await getAllDocuments(
+      client,
+      'comments',
+      { eventId: eventId },
+      { _id: -1 }
+    );
+  } catch (error) {
+    const response = new Response(
+      JSON.stringify({ message: 'Error listing comments', error }),
+      {
+        status: 500,
+      }
+    );
+    client?.close();
+    return response;
+  }
+
   client.close();
 
   return new Response(
