@@ -19,12 +19,9 @@ export async function POST(request) {
   const userEmail = body.email;
 
   if (!userEmail || !userEmail.includes('@')) {
-    return new Response(
-      { message: 'Invalid email address.' },
-      {
-        status: 422,
-      }
-    );
+    return new Response(JSON.stringify({ message: 'Invalid email address.' }), {
+      status: 422,
+    });
   }
 
   console.log('User Email', { message: 'Signed up!', userEmail });
