@@ -6,7 +6,7 @@ _Last updated: 2026-11-12_
 
 - Featured, all-events, filtered, and detail pages are implemented.
 - Events, comments and newsletter emails live in Supabase Postgres (`newsletter` schema); schema + seed in `db/migration.sql` (idempotent). Verified end to end against Postgres on 2026-11-12.
-- Linked to Vercel project `newsletter-events-with-context` (GitHub connected). Deployment waits on the Supabase integration being provisioned.
+- Linked to Vercel project `newsletter-events-with-context` (GitHub connected). Live at https://newsletter-events-with-context.vercel.app since 2026-11-12.
 - No tests yet.
 
 ## Key decisions
@@ -27,7 +27,6 @@ _Last updated: 2026-11-12_
 
 ## Next steps
 
-- Add the live URL to the README once deployed.
 
 ---
 

@@ -6,6 +6,14 @@ Events, comments and newsletter emails all live in a `newsletter` schema of a ho
 
 > **Follow-along project.** This app was built while following **Next.js 14 & React — The Complete Guide (Academind / Maximilian Schwarzmüller)**. It is included in the portfolio as a learning exercise, not as a production product. The implementation is my own work based on the course material.
 
+## Live demo
+
+| | |
+| --- | --- |
+| **Live site** | https://newsletter-events-with-context.vercel.app |
+| **Repository** | https://github.com/MarioGranada/newsletter-events-with-context |
+| **Portfolio summary** | Events directory on the Next.js Pages Router with ISR, date filtering, per-event comments and newsletter sign-up, backed by Supabase Postgres. |
+
 ## Features
 
 - Featured events on the home page with incremental static regeneration.
@@ -124,6 +132,7 @@ The API surface lives in `app/api/` as route handlers: `POST /api/newsletter` va
 
 ## Deployment
 
+- **Live:** https://newsletter-events-with-context.vercel.app (Vercel production, deployed from `master`).
 - Target: Vercel, with data in the shared portfolio Supabase project (schema `newsletter`). The Supabase ↔ Vercel integration injects `POSTGRES_URL` into every environment.
 - Run `npm run db:migrate` once against the Supabase database before the first deployment.
 - History: events used to come from a Firebase Realtime Database that has since been deactivated, and comments/emails from MongoDB Atlas; both were replaced by Postgres on 2026-11-12.
