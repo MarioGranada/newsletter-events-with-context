@@ -17,8 +17,7 @@ This document defines the non-negotiable foundations for this repository. Read i
 | --- | --- | --- |
 | Framework | Next.js 14 (Pages Router) | The course project uses `pages/` for pages and `getStaticProps` for pre-rendering. |
 | UI | React 18 | Component model for the event list, detail, comments, and notification banner. |
-| Event data | Firebase Realtime Database | A public JSON endpoint supplies the event catalogue without an API layer. |
-| Database | MongoDB Atlas + `mongodb` driver | Stores newsletter emails and comments from the route handlers. |
+| Database | Supabase Postgres via `postgres` (postgres.js) | One hosted store for events, comments and emails (2026-11-12). Replaced the deactivated Firebase events endpoint and MongoDB Atlas. |
 | State | React Context | The notification banner is shared by unrelated forms. |
 | Styling | CSS Modules + global CSS | Scoped component styles with a small global reset. |
 
@@ -28,24 +27,24 @@ This document defines the non-negotiable foundations for this repository. Read i
 
 ### 1. Scope
 
-A course project that demonstrates Next.js pre-rendering, API route handlers, MongoDB access, and shared UI state through context. It is a single-tenant demo; accounts, moderation, and production-grade database pooling are out of scope.
+A course project that demonstrates Next.js pre-rendering, API route handlers, Postgres access, and shared UI state through context. It is a single-tenant demo; accounts, moderation, and production-grade database pooling are out of scope.
 
 ### 2. Environment Isolation
 
-- The app reads these values from the environment: `DB_USER`, `DB_PASSWORD`.
+- The app reads `POSTGRES_URL` (and optionally `POSTGRES_URL_NON_POOLING` for migrations) from the environment.
 - Keep real values in `.env` (gitignored) and document them in the example file and README.
 - Never commit keys, tokens, database URLs, or credentials.
 - Validate required values at the point of use and fail with a clear message.
 
 ### 3. Architecture
 
-- Keep Firebase reads in `helpers/api-util.js` and MongoDB access in `helpers/db-util.js`; pages and components should not contain queries.
+- Keep event queries in `helpers/api-util.js` and comment/newsletter queries in `helpers/db-util.js`; pages and components should not contain queries.
 - Route handlers validate input and return explicit status codes.
 - Shared UI state belongs in `store/`; component-local state stays local.
 
 ### 4. Data and State
 
-- Firebase is the source of truth for events; MongoDB is the source of truth for emails and comments.
+- Supabase Postgres (`newsletter` schema) is the source of truth for events, comments and emails; schema and seed live in `db/migration.sql`.
 - Event pages are statically generated and revalidated, so changes appear after the revalidation window.
 - Comments are fetched on demand and are not cached on the client.
 - Never log credentials or full database errors to the browser.
@@ -60,19 +59,18 @@ A course project that demonstrates Next.js pre-rendering, API route handlers, Mo
 
 - `npm run build` is the only automated gate.
 - Manually test the home page, all events, a date filter, a detail page, comments (empty, valid, invalid), and newsletter validation.
-- Confirm the app still renders when MongoDB is unavailable, with a visible error rather than a crash.
+- Confirm comment and newsletter failures show an error notification rather than a crash.
 
 ### 7. Deployment
 
-- Deploy to Vercel with MongoDB Atlas; set credentials in the hosting environment.
-- Keep the Firebase rules read-only for the public event catalogue.
+- Deploy to Vercel; data lives in the shared portfolio Supabase project and `POSTGRES_URL` comes from the Supabase ↔ Vercel integration.
 - Do not add a database ORM or auth layer unless a feature requires it.
 
 ## What to Avoid
 
 - Committing `.env.local`, Atlas credentials, or connection strings.
-- Fetching Firebase data directly inside presentational components.
-- Leaving MongoDB clients open after a request.
+- Querying the database directly inside presentational components.
+- Opening a new database connection per request.
 - Assuming comments or emails are available when the database is down.
 - Adding a second state library for a notification banner.
 
