@@ -7,6 +7,7 @@ _Last updated: 2026-11-12_
 - Featured, all-events, filtered, and detail pages are implemented.
 - Events, comments and newsletter emails live in Supabase Postgres (`newsletter` schema); schema + seed in `db/migration.sql` (idempotent). Verified end to end against Postgres on 2026-11-12.
 - Linked to Vercel project `newsletter-events-with-context` (GitHub connected). Live at https://newsletter-events-with-context.vercel.app since 2026-11-12.
+- Nightly reset (2026-11-12): Vercel Cron `0 4 * * *` → `/api/cron/reset` deletes every comment and newsletter email (events stay); guarded by the `CRON_SECRET` env var.
 - No tests yet.
 
 ## Key decisions

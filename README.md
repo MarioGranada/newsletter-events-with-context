@@ -14,6 +14,8 @@ Events, comments and newsletter emails all live in a `newsletter` schema of a ho
 | **Repository** | https://github.com/MarioGranada/newsletter-events-with-context |
 | **Portfolio summary** | Events directory on the Next.js Pages Router with ISR, date filtering, per-event comments and newsletter sign-up, backed by Supabase Postgres. |
 
+The demo is public: comments and newsletter emails are deleted every night (04:00 UTC).
+
 ## Features
 
 - Featured events on the home page with incremental static regeneration.
@@ -86,6 +88,7 @@ vercel env pull .env.local
 | --- | --- | --- |
 | `POSTGRES_URL` | Pooled Postgres connection string (set by the Supabase integration). | Yes |
 | `POSTGRES_URL_NON_POOLING` | Direct connection used by `npm run db:migrate`; falls back to `POSTGRES_URL`. | No |
+| `CRON_SECRET` | Protects `/api/cron/reset`; Vercel sends it to the nightly cron. Random value set in the Vercel project. | Production |
 
 Any Postgres works locally, e.g. `POSTGRES_URL=postgres://postgres:postgres@localhost:5432/postgres`. See `.env.example`.
 
@@ -134,6 +137,7 @@ The API surface lives in `app/api/` as route handlers: `POST /api/newsletter` va
 
 - **Live:** https://newsletter-events-with-context.vercel.app (Vercel production, deployed from `master`).
 - Target: Vercel, with data in the shared portfolio Supabase project (schema `newsletter`). The Supabase ↔ Vercel integration injects `POSTGRES_URL` into every environment.
+- A daily Vercel Cron (`vercel.json`, 04:00 UTC) calls `/api/cron/reset`, which deletes every comment and newsletter email (events stay). It requires `CRON_SECRET`.
 - Run `npm run db:migrate` once against the Supabase database before the first deployment.
 - History: events used to come from a Firebase Realtime Database that has since been deactivated, and comments/emails from MongoDB Atlas; both were replaced by Postgres on 2026-11-12.
 - Deployed through Vercel’s Git integration; no GitHub Actions workflow is needed.

@@ -64,6 +64,7 @@ A course project that demonstrates Next.js pre-rendering, API route handlers, Po
 ### 7. Deployment
 
 - Deploy to Vercel; data lives in the shared portfolio Supabase project and `POSTGRES_URL` comes from the Supabase ↔ Vercel integration.
+- A nightly Vercel Cron calls `/api/cron/reset`, which deletes every comment and newsletter email (events stay). The endpoint refuses requests without `Authorization: Bearer $CRON_SECRET`.
 - Do not add a database ORM or auth layer unless a feature requires it.
 
 ## What to Avoid
