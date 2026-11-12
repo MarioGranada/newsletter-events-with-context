@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import Head from 'next/head';
 
-import { getFilteredEvents } from '../../helpers/api-util';
 import EventList from '../../components/events/event-list';
 import ResultsTitle from '../../components/events/results-title';
 import Button from '../../components/ui/button';
@@ -15,23 +14,16 @@ function FilteredEventsPage(props) {
 
   const filterData = router.query.slug;
 
-  const { data, error } = useSWR(
-    'https://nextjs-course-c81cc-default-rtdb.firebaseio.com/events.json',
-    (url) => fetch(url).then(res => res.json())
+  const { data, error } = useSWR('/api/events', (url) =>
+    fetch(url).then((res) => {
+      if (!res.ok) throw new Error('Could not load events.');
+      return res.json();
+    })
   );
 
   useEffect(() => {
     if (data) {
-      const events = [];
-
-      for (const key in data) {
-        events.push({
-          id: key,
-          ...data[key],
-        });
-      }
-
-      setLoadedEvents(events);
+      setLoadedEvents(data);
     }
   }, [data]);
 

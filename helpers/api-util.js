@@ -1,42 +1,30 @@
+import sql from './db';
+
+// Event catalogue, read from the `newsletter` schema in Supabase Postgres.
+// Server-only: called from getStaticProps/getStaticPaths and route handlers.
+const columns = sql`
+  id, title, description, location, image,
+  to_char(date, 'YYYY-MM-DD') as date,
+  is_featured as "isFeatured"
+`;
+
 export async function getAllEvents() {
-  const response = await fetch(
-    'https://base-db-all-projects-default-rtdb.firebaseio.com/events.json'
-  );
-  const data = await response.json();
-
-  const events = [];
-
-  for (const key in data) {
-    events.push({
-      id: key,
-      ...data[key],
-    });
-  }
-
-  return events;
+  return sql`select ${columns} from newsletter.events order by date`;
 }
 
 export async function getFeaturedEvents() {
-  const allEvents = await getAllEvents();
-  return allEvents.filter((event) => event.isFeatured);
+  return sql`select ${columns} from newsletter.events where is_featured order by date`;
 }
 
 export async function getEventById(id) {
-  const allEvents = await getAllEvents();
-  return allEvents.find((event) => event.id === id);
+  const [event] = await sql`select ${columns} from newsletter.events where id = ${id}`;
+  return event;
 }
 
-export async function getFilteredEvents(dateFilter) {
-  const { year, month } = dateFilter;
-
-  const allEvents = await getAllEvents();
-
-  let filteredEvents = allEvents.filter((event) => {
-    const eventDate = new Date(event.date);
-    return (
-      eventDate.getFullYear() === year && eventDate.getMonth() === month - 1
-    );
-  });
-
-  return filteredEvents;
+export async function getFilteredEvents({ year, month }) {
+  return sql`
+    select ${columns} from newsletter.events
+    where extract(year from date) = ${year} and extract(month from date) = ${month}
+    order by date
+  `;
 }

@@ -1,25 +1,28 @@
-import { MongoClient } from 'mongodb';
+import sql from './db';
 
-export const connectDB = async () => {
-  const dbUrl = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.vfrndqf.mongodb.net/newsletter-nextjs-course?retryWrites=true&w=majority&appName=Cluster0`;
-  const client = await MongoClient.connect(dbUrl);
+// Comments and newsletter sign-ups, stored in the `newsletter` schema.
 
-  return client;
-};
+export async function insertComment({ eventId, email, name, text }) {
+  const [comment] = await sql`
+    insert into newsletter.comments (event_id, email, name, text)
+    values (${eventId}, ${email}, ${name}, ${text})
+    returning id, name, text
+  `;
+  return comment;
+}
 
-export const insertDocument = async (client, collection, document) => {
-  const db = client.db();
-  //   await db.collection('emails').insertOne(document);
-  const result = await db.collection(collection).insertOne(document);
-  return result;
-};
+// Only public fields: commenter emails are never sent to the browser.
+export async function getCommentsForEvent(eventId) {
+  return sql`
+    select id, name, text from newsletter.comments
+    where event_id = ${eventId}
+    order by id desc
+  `;
+}
 
-export const getAllDocuments = async (client, collection, filter, sort) => {
-  const db = client.db();
-  const documents = await db
-    .collection(collection)
-    .find(filter)
-    .sort(sort)
-    .toArray();
-  return documents;
-};
+export async function insertNewsletterEmail(email) {
+  await sql`
+    insert into newsletter.emails (email) values (${email})
+    on conflict (email) do nothing
+  `;
+}
